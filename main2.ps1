@@ -31,9 +31,10 @@ $existingEntry = Get-ItemProperty -Path $regKey -Name $scriptName -ErrorAction S
 if ($existingEntry) {
     Write-Host "Script is already added to startup." -ForegroundColor Yellow
 } else {
-    # Add the script to startup
+    # Add the script to startup using powershell.exe to run the script
     try {
-        Set-ItemProperty -Path $regKey -Name $scriptName -Value "$scriptPath"
+        # Add the full PowerShell command to registry
+        Set-ItemProperty -Path $regKey -Name $scriptName -Value "powershell.exe -ExecutionPolicy Bypass -File `"$scriptPath`""
         Write-Host "Script added to startup." -ForegroundColor Green
     }
     catch {
