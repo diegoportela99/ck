@@ -56,10 +56,10 @@ $cpuInfo = Get-WmiObject -Class Win32_Processor
 $userInfo = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
 $hostname = $env:COMPUTERNAME
 
-# Start an infinite loop to check the file every 5 seconds
+# Start an infinite loop to check the file every 10 minutes
 while ($true) {
-    # Pause for 120 seconds before checking
-    Start-Sleep -Seconds 120
+    # Pause for 10 minutes before checking
+    Start-Sleep -Seconds 600
 
     # Check if the temp log file exists
     if (Test-Path $tempFilePath) {
