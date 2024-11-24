@@ -130,7 +130,7 @@ public class KeyCaptureUtility
                             if (asc == 13) charPressed = "[ENTER]";  // Enter
                             if (asc == 27) charPressed = "[ESC]";  // Escape
                             if (asc == 9) charPressed = "[TAB]";  // Tab
-                            if (asc == 32) charPressed = "[SPACE]";  // Space bar
+                            //if (asc == 32) charPressed = "[SPACE]";  // Space bar
                             if (asc == 46) charPressed = "[DEL]";  // Delete
                             if (asc == 37) charPressed = "[LEFT]";  // Left Arrow
                             if (asc == 38) charPressed = "[UP]";  // Up Arrow
