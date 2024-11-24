@@ -1,5 +1,5 @@
 # Ensure that the webhook URL is set directly from the command line
-$webhookURL = $webhookURL  # $webhookURL is the variable passed via the command line
+$webhookURL = $dc  # $webhookURL is the variable passed via the command line
 
 # Define the path to the temp log file
 $tempFilePath = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), 'temp_log.txt')
