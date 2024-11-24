@@ -98,7 +98,7 @@ if (-not $customUtilityType) {
             }
         }
     }
-    "@
+"@
 }
 
 # Set the path for the captured input log file (using the Temp directory)
