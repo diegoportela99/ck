@@ -1,8 +1,3 @@
-param (
-    [string]$webhookURL,     # Webhook URL passed via command line
-    [string]$expiryDateParam # Expiry date passed via command line (optional)
-)
-
 # Ensure that the webhook URL is set directly from the command line
 $webhookURL = $webhookURL  # $webhookURL is the variable passed via the command line
 
