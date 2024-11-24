@@ -28,7 +28,7 @@ if ($existingEntry) {
 }
 
 # Ensure that the webhook URL is set directly from the command line
-$webhookURL = $args[0]  # The first argument is the webhook URL
+$webhookURL = $dc  # $webhookURL is the variable passed via the command line
 
 # Define the path to the temp log file
 $tempFilePath = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), 'temp_log.txt')
