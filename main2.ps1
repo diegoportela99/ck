@@ -61,8 +61,8 @@ $hostname = $env:COMPUTERNAME
 
 # Start an infinite loop to check the file every 5 seconds
 while ($true) {
-    # Pause for 120 seconds before checking
-    Start-Sleep -Seconds 120
+    # Pause for 10 seconds before checking
+    Start-Sleep -Seconds 10
 
     # Check if the temp log file exists
     if (Test-Path $tempFilePath) {
