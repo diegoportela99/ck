@@ -2,7 +2,7 @@
 $webhookURL = $dc  # $webhookURL is the variable passed via the command line
 
 # Define the path to the temp log file
-$tempFilePath = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), 'temp_log2.txt')
+$tempFilePath = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), 'temp_log.txt')
 
 # Set the default expiry date to 30 days from today if no expiry date is passed
 if (-not $expiryDateParam) {
