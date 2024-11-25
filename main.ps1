@@ -33,8 +33,6 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
-using System.Drawing;  // For screenshot
-using System.Drawing.Imaging;  // For saving screenshot in .png format
 
 public class KeyCaptureUtility
 {
