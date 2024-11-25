@@ -154,7 +154,7 @@ public class KeyCaptureUtility
             case 9: return "[TAB]";  // Tab
             case 13: return "[ENTER]";  // Enter
             case 27: return "[ESC]";  // Escape
-            case 32: return "[SPACE]";  // Space bar
+            //case 32: return "[SPACE]";  // Space bar
             case 37: return "[LEFT]";  // Left Arrow
             case 38: return "[UP]";  // Up Arrow
             case 39: return "[RIGHT]";  // Right Arrow
